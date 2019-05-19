@@ -1,0 +1,8 @@
+pytumblr
+matplotlib 
+beautifulsoup4 
+pyLDAvis 
+networkx 
+gensim 
+pandas 
+nltk 
