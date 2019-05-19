@@ -1,0 +1,322 @@
+<!doctype html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+		<title>reveal.js</title>
+
+		<link rel="stylesheet" href="css/reset.css">
+		<link rel="stylesheet" href="css/reveal.css">
+		<link rel="stylesheet" href="css/theme/black.css">
+
+		<!-- Theme used for syntax highlighting of code -->
+		<link rel="stylesheet" href="lib/css/monokai.css">
+
+		<!-- Printing and PDF exports -->
+		<script>
+			var link = document.createElement( 'link' );
+			link.rel = 'stylesheet';
+			link.type = 'text/css';
+			link.href = window.location.search.match( /print-pdf/gi ) ? 'css/print/pdf.css' : 'css/print/paper.css';
+			document.getElementsByTagName( 'head' )[0].appendChild( link );
+		</script>
+	</head>
+	<body>
+		<div class="reveal">
+			<div class="slides">
+                <section data-markdown>
+                    <textarea data-template>
+                        ## Making Sense of Text: What Topic Modeling Can Tell Us About Python Discussions on Tumblr
+
+                        Ljubljana Python Meetup 2019
+
+
+                    </textarea>
+                </section>
+                
+                <section data-markdown>
+                    <textarea data-template>
+                        ### Algoritm Used
+
+                        **LDA: Latent Dirichlet Allocation**
+
+                            import gensim
+
+                            texts = [["mother", "went", "to", "the", "shop"], 
+                                     ["i", "enjoy", "python", "meetups"]]
+                            dic = gensim.corpora.Dictionary(texts)
+                            doc_term = [dic.doc2bow(text) for text in texts]
+
+                            Lda = gensim.models.ldamodel.LdaModel
+                            model = Lda(doc_term, num_topics=2, id2word=dic, passes=20)
+
+                            model.print_topics(num_topics=-1, num_words=15)
+                    </textarea>
+                </section>
+                <section data-markdown>
+                    <textarea data-template>
+                        ### Preprocessing
+
+                        * Removing shorter posts helps
+                        * Removing shorter words helps
+                        * Removing non-content based words helps (include only nouns, verbs, adjectives and adverbs)
+                        * Lemmization and steming helps
+                        * Including bi-grams and tri-grams does help, but the effect is smaller than with upper points
+                    </textarea>
+                </section>
+                <section data-markdown>
+                    <textarea data-template>
+                        ### The Many Meanings of Python
+
+                        OR How to remove the posts, where python is not really Python?
+                    </textarea>
+                </section>
+                <section data-markdown>
+                    <textarea data-template>
+                        ### Two-Topic Solution
+
+                        * Topic 1: **PROGRAMMING JOBS** (use, get, people, startup, work, make, thing, python, want, time)
+                        * Topic 2: **NATURE** (god, old, night, moon, man, strange, earth, stone, thing, city)
+
+                        [Vizualization of Two Topic Solution](models/LDA_1_2.html)
+
+                    </textarea>
+                </section>
+                <section data-markdown>
+                    <textarea data-template>
+                        ### Three-Topic Solution
+
+                        * Topic 1: **PROGRAMMING** (python, use, code, print, return, import, file, create, twilio, number)
+                        * Topic 2: **JOBS** (people, startup, thing, work, get, make, good, want, think, company)
+                        * Topic 3: **NATURE** (god, man, moon, old, night, earth, strange, stone, atal, men,)
+
+                        [Vizualization of Three Topic Solution](models/LDA_1_3.html)
+
+
+                    </textarea>
+                </section>
+
+                <section data-markdown>
+                    <textarea data-template>
+                        ### What to eliminate?
+
+                        **All the posts, that include the topic in question (in this case nature)**
+
+                        Eliminating just posts, where nature is the strongest topic or even here the nature topic is less than 10% of the text is still going to lead to having nature-themed topics
+                    </textarea>
+                </section>
+
+                <section data-markdown>
+                    <textarea data-template>
+                        ### Choosing the number of topics
+
+                        * Perplexsity
+                        * Coherence
+                        * Distribution of topics
+                        * Interpretation
+                    </textarea>
+                </section>
+
+                <section data-markdown>
+                    <textarea data-template>
+                        ### Perplexsity
+
+                            models = [model1, model2, model3]
+                            perplexsity = []
+
+                            for model in models:
+                                p = model.log_perplexity(doc_term)
+                                perplexsity.append(p)
+
+                            plt.plot(perplexsity)
+
+                        The lower the better (check, where is starts leveling out)
+                    </textarea>
+                </section>
+
+                <section data-markdown>
+                    <textarea data-template>
+                        ### Perplexsity
+
+                        ![Perplexsity of models](images/perplexsity.png)
+
+                    </textarea>
+                </section>
+
+
+                <section data-markdown>
+                    <textarea data-template>
+                        ### Coherence
+
+                            models = [model1, model2, model3]
+                            coherence = []
+
+                            for model in models:
+                                cm = gensim.models.CoherenceModel
+                                c = cm(model=model, texts=texts, dictionary=dic)
+                                cc = c.get_coherence()
+                                coherence.append(cc)
+
+                            plt.plot(coherence)
+
+
+                        The higher the better
+                    </textarea>
+                </section>
+
+
+                <section data-markdown>
+                    <textarea data-template>
+                        ### Coherence
+
+                        ![Coherance of models](images/coherance.png)
+
+                    </textarea>
+                </section>
+
+
+                <section data-markdown>
+                    <textarea data-template>
+                        ### Distribution of Topics
+
+                            import pyLDAvis
+
+                            pyLDAvis.enable_notebook()
+
+                            vis = pyLDAvis.gensim.prepare(model, doc_term, dic)
+
+                            # Jupyter books
+                            vis 
+                            # save html version
+                            pyLDAvis.save_html(vis, filename)
+
+
+                        Better, if they are widespread
+                    </textarea>
+                </section>
+
+                <section data-markdown>
+                    <textarea data-template>
+                        ### Distribution of Topics
+
+                        * [Model with 5 Topics (Suggested numerically)](models/LDA_2_5.html)
+                        * [Model with 12 Topics](models/LDA_2_12.html)
+                        * [Model with 14 Topics (Example of bad spread)](models/LDA_2_14.html)
+                        * [Model with 17 Topics (Example of a bit better spread)](models/LDA_2_17.html)
+                        * [Model with 20 Topics](models/LDA_2_20.html)
+                        * [Model with 23 Topics](models/LDA_2_23.html)
+                        * [Model with 28 Topics](models/LDA_2_28.html)
+
+                    </textarea>
+                </section>
+
+
+                <section data-markdown>
+                    <textarea data-template>
+                        ### Interpretations
+
+                        Can you explain, what the gist of each topic is?
+                    </textarea>
+                </section>
+
+                <section data-markdown>
+                    <textarea data-template>
+                        ### Topics found (5 Topics Solution)
+
+                        * **SCHOOL** (*think*, good, *section*, *paper*, way, text, *question*, *grade*, get)
+                        * **making COMMUNICATION** (*twilio*, use, *create*, *message*, *user*, *need*, *code*)
+                        * **LEARNING PYTHON** (*python*, use, *program*, *code*, *link*, *learn*, data, work, language)
+                        * **STARTUP founders** (*startup*, *people*, *work*, get, make, *company*, thing, want)
+                        * **CODE examples** (*print*, *return*, *def*, *import*, python, *function*, *list*, number, *self*)
+
+                    </textarea>
+                </section>
+
+                <section data-markdown>
+                    <textarea data-template>
+                        ### Temporal distribution of Topics
+
+                        ![temporal distribution of topics](images/topic_values_by_year.png)
+                    </textarea>
+                </section>
+
+                <section data-markdown>
+                    <textarea data-template>
+                        ### Topics found (17 Topic Solution)
+
+                        | Topics          | Topics             | Topics           |
+                        | --------- ----- | ------------------ | ---------------- |
+                        | Startup Lessons | Working in Startup | Creating Startup |
+                        | Y-Combinator    | Announcments       | Communication    |
+                        | Creating Apps   | Programming        | Data Analysis    |
+                        | Learn Python    | Python Courses     | School           |
+                        | Autentication   | Installing         | Q and A          |
+                        | Code Examples   | Code (jp)          |                  |
+
+
+                    </textarea>
+                </section>
+
+                <section data-markdown>
+                    <textarea data-template>
+                        ### Topics appearing together
+
+                        ![network of topics by coapperance](images/topics_by_coapperance.png)
+
+                    </textarea>
+                </section>
+
+                <section data-markdown>
+                    <textarea data-template>
+                        ### Only Coding Topics
+
+                        * Creating video apps
+                        * Extending websites
+                        * Code examples
+                        * Creating chat apps
+                        * Setting up programs
+
+                        [Five Topic Solution](models/LDA_3_5.html)
+
+                    </textarea>
+                </section>
+
+
+                <section data-markdown>
+                    <textarea data-template>
+                        If you have any comments, suggestions, question and so on, you can either:
+
+                        * find me here after the meetup
+                        * send me an email: sarajaksa@sarajaksa.eu
+
+                        The code of analysis can be found here: [https://github.com/sarajaksa/tumblr-python-topic-modeling](https://github.com/sarajaksa/tumblr-python-topic-modeling)
+
+
+                    </textarea>
+                </section>
+
+
+
+
+
+			</div>
+		</div>
+
+		<script src="js/reveal.js"></script>
+
+		<script>
+			// More info about config & dependencies:
+			// - https://github.com/hakimel/reveal.js#configuration
+			// - https://github.com/hakimel/reveal.js#dependencies
+			Reveal.initialize({
+				dependencies: [
+					{ src: 'plugin/markdown/marked.js' },
+					{ src: 'plugin/markdown/markdown.js' },
+					{ src: 'plugin/notes/notes.js', async: true },
+					{ src: 'plugin/highlight/highlight.js', async: true }
+				]
+			});
+		</script>
+	</body>
+</html>
