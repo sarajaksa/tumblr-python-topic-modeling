@@ -55,7 +55,7 @@ These libraries are needed to replicate the analysis. To just look at the analys
 
 The presentation can be found in the folder Presentation. It was created with [reveal.js](https://github.com/hakimel/reveal.js) framework. It can be started by opening the index.html file in the browser. 
 
-The presentation can also be found on []()
+The presentation can also be found on [https://sarajaksa.eu/content/presentations/2019/ljubljana-python-meetup-may-2019/index.html](https://sarajaksa.eu/content/presentations/2019/ljubljana-python-meetup-may-2019/index.html)
 
 ## Topic Models Visualization
 -----------------------------------
